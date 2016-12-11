@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["brombacher1@gmail.com"]
 
   spec.summary       = "Converts currencies after being fed a conversion rate, either manually or from an API"
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.homepage      = "https://github.com/shushugah/currency_shushugah"
   spec.license       = "MIT"
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = "exe"
