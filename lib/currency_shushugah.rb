@@ -1,55 +1,74 @@
-require "currency_shushugah/version"
+require 'currency_shushugah/version'
 
+# Understands currency and quantity
 class Money
-  attr_accessor :currency, :amount
-	@@currencies = {}
-	@@base_currency = ""
+  include Comparable
 
-	def self.conversion_rates(currency, hash)
-		@@currencies[currency] = hash
-		@@base_currency = currency
-	end
+  attr_reader :quantity, :currency
+  protected :currency, :quantity
 
-	def initialize(amount, currency)
-		@amount = amount.round(2)
-		@currency = currency
-	end
-
-	def convert_to(currency_code)
-		return self if currency == currency_code
-		if @@currencies[currency] && @@currencies[currency].has_key?(currency_code)
-			Money.new(@@currencies[currency][currency_code]*amount, currency_code)	
-		else
-			Money.new(amount/@@currencies[currency_code][currency], currency_code)
-		end	
-	end
-
-	def inspect
-		"#{'%0.2f' % @amount} #{@currency}"
-	end
-
-  [:+, :-].each do |method_name|
-  	define_method method_name do |arg|
-  	if currency == arg.currency	
-  		normalized_amount, normalized_arg_amount, currency_param = amount, arg.amount, currency
-  	elsif [currency, arg.currency].include?(@@base_currency)
-  		normalized_amount, normalized_arg_amount, currency_param = self.convert_to(@@base_currency).amount, arg.convert_to(@@base_currency).amount, @@base_currency
-  	else
-  		normalized_arg_amount, currency_param = arg.convert_to(currency).amount, currency	  		
-  	end
-  		Money.new(normalized_amount.send(method_name, normalized_arg_amount), currency_param)
-  	end
+  def self.conversion_rates(base_currency, hash_rates)
+    @rates = hash_rates.merge(base_currency => 1)
   end
 
-  [:*, :/].each do |method_name|
-  	define_method method_name do |arg|
-  		Money.new(amount.send(method_name, arg), currency)
-  	end
+  def initialize(quantity, currency)
+    raise StandardError.new('Not supported currency') unless rates[currency]
+    @quantity = quantity
+    @currency = currency
   end
 
-  [:>,:<,:==].each do |method_name|
-  	define_method method_name do |arg|
-  		amount.send(method_name, arg.convert_to(currency).amount) 
-  	end
+  def <=>(other)
+    return unless other.class == self.class
+    quantity <=> other.convert_to(currency).quantity
+  end
+
+  def inspect
+    "#{'%0.2f' % quantity} #{currency}"
+  end
+
+  def convert_to(other_currency)
+    raise StandardError.new('InvalidCurrency') unless rates[other_currency]
+    return self if currency == other_currency
+    new_quantity = @quantity * rates[other_currency] / rates[currency]
+    new_money(new_quantity, other_currency)
+  end
+
+  def +(other)
+    new_money(quantity + other.convert_to(currency).quantity)
+  end
+
+  def -(other)
+    self + -other
+  end
+
+  def -@
+    new_money(-quantity)
+  end
+
+  def coerce(other)
+    return self, other
+  end
+
+  def *(scalar)
+    new_money(quantity * scalar)
+  end
+
+  def /(scalar)
+    raise StandardError.new 'InvalidDivision' if scalar.zero?
+    self * (1.0 / scalar)
+  end
+
+  def new_money(quantity, currency = @currency)
+    Money.send :new, quantity.round(2), currency
+  end
+
+  def self.rates
+    Money.instance_variable_get(:@rates)
+  end
+
+  private
+
+  def rates
+    self.class.rates
   end
 end
