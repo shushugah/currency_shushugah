@@ -1,3 +1,8 @@
+[![Code Climate](https://codeclimate.com/github/shushugah/currency_shushugah/badges/gpa.svg)](https://codeclimate.com/github/shushugah/currency_shushugah) [![Issue Count](https://codeclimate.com/github/shushugah/currency_shushugah/badges/issue_count.svg)](https://codeclimate.com/github/shushugah/currency_shushugah) [![Test Coverage](https://codeclimate.com/github/shushugah/currency_shushugah/badges/coverage.svg)](https://codeclimate.com/github/shushugah/currency_shushugah/coverage)
+# CurrencyShushugah Gem
+
+Applying best practices and ruby knowledge here.  
+
 ## Installation
 
 Add this line to your application's Gemfile:
